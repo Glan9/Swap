@@ -26,8 +26,10 @@ else:
 		while len(l)<width:
 			l.append(' ')
 
+#print(grid)
+
 def swap(char):
-	ops = '''<v[/_s?"im+*(=,%@#$.~):-no'!x|\]^>'''
+	ops = '''<v[/_s?"i+*(=,%@#$.~):-o'!x|\]^>'''
 	if char in ops:
 		return ops[~ops.find(char)]
 	else:
@@ -67,12 +69,16 @@ try:
 			charMode = False
 		else:
 			if cell == '<': 
+				ver = 0
 				hor = -1
 			elif cell == '>': 
+				ver = 0
 				hor = 1
 			elif cell == 'v':
+				hor = 0
 				ver = 1
 			elif cell == '^':
+				hor = 0
 				ver = -1
 			elif cell == '/':
 				(hor, ver) = (ver*-1, hor*-1)
@@ -86,11 +92,11 @@ try:
 				hor = abs(hor)*-1
 			elif cell == ']':
 				hor = abs(hor)
-			elif cell == '?':
-				if pop():
-					skip = True
 			elif cell == '!':
-				if not pop():
+				if pop() != 0:
+					skip = True
+			elif cell == '?':
+				if pop() == 0:
 					skip = True
 			elif cell == 'x':
 				break
@@ -102,34 +108,40 @@ try:
 				push(ord(readchar()))
 			elif cell == 'o':
 				sys.stdout.write(chr(pop()))
-			#elif cell == 'm':
-			#	input = ''
-			#	c = readchar()
-			#	while c in '0123456789' or (c == '-' and input == ''):
-			#		input += c
-			#		c = readchar()
-			#	inBuffer += c
-			#	push(int(input) if input else 0)
-			#elif cell == 'n':
-			#	sys.stdout.write(str(pop()))
 			elif cell in '0123456789':
 				push(int(cell))
 			elif cell == '+':
-				push(pop()+pop())
+				b = pop()
+				a = pop()
+				push(a+b)
 			elif cell == '-':
-				push(pop()-pop())
+				b = pop()
+				a = pop()
+				push(a-b)
 			elif cell == '*':
-				push(pop()*pop())
+				b = pop()
+				a = pop()
+				push(a*b)
 			elif cell == ':':
-				push(pop()//pop())
+				b = pop()
+				a = pop()
+				push(a//b)
 			elif cell == '(':
-				push(1 if pop()<pop() else 0)
+				b = pop()
+				a = pop()
+				push(1 if a<b else 0)
 			elif cell == ')':
-				push(1 if pop()<pop() else 0)
+				b = pop()
+				a = pop()
+				push(1 if a>b else 0)
 			elif cell == '=':
-				push(1 if pop()==pop() else 0)
+				b = pop()
+				a = pop()
+				push(1 if a==b else 0)
 			elif cell == '~':
-				push(1 if pop()==pop() else 0)
+				b = pop()
+				a = pop()
+				push(1 if a!=b else 0)
 			elif cell == ',':
 				v = pop()
 				push(v)
@@ -137,19 +149,19 @@ try:
 			elif cell == '.':
 				pop()
 			elif cell == '%':
+				active = 1-active
+			elif cell == '$':
 				x = pop()
 				y = pop()
 				push(x)
 				push(y)
-			elif cell == '$':
-				active = 1-active
 			elif cell == '@':
 				stacks[active] = stacks[active][-1:]+stacks[active][:-1]
 			elif cell == '#':
 				stacks[active] = stacks[active][1:]+stacks[active][:1]
 
 		grid[y][x] = swap(cell)
-		(x,y) = ((x+(hor+hor*skip))%width, (y+(ver+ver*skip))%height)
+		(x,y) = ((x+(hor*(2 if skip else 1)))%width, (y+(ver*(2 if skip else 1)))%height)
 
-except:
+except Exception as e:
 	sys.stderr.write("Uh oh")
